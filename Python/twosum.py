@@ -3,7 +3,7 @@ A function that solves the two-sum problem
 What are all permutations of a given sequence of numbers that add up to the target number?
 """
 
-numbers = [5, 7, 1, 3, 8, 5, 2, 14, 1]
+numbers = [5, 7, 4, 1, 3, 8, 5, 2, 14, 1]
 
 def twoSum(seq, target):
     permutations = []
