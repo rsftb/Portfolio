@@ -23,4 +23,4 @@ def twoSum(seq, target):
         return permutations
 
 
-print(twoSum(numbers, 5))
+print(twoSum(numbers, 10))
