@@ -1,6 +1,7 @@
 # Portfolio
 A display of my programming skills.
 
+Most of my experience lies in Python.
 
 > Contact Information
 >* Rami Simons
