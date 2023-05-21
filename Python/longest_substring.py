@@ -9,7 +9,7 @@ string1 = "arsuijfkasdik"
 string2 = "asgegregesarysagefhaesgrknelo"
 
 
-def longest_sub(strng):
+def longest_sub(string):
     '''
     >>> longest_sub("Hello World!")
     >>> "lo W"
@@ -17,12 +17,12 @@ def longest_sub(strng):
 
     print()
 
-    if not isinstance(strng, str) or not strng:
+    if not isinstance(string, str) or not string:
         print("Invalid input, input must be a 0+ length string")
         return False
 
-    search = [*strng]
-    last = len(strng)
+    search = [*string]
+    last = len(string)
 
     start, end = 0, 0 # Dynamic window (looks for largest)
     s, e = 0, 0 # Static window (largest found)
@@ -36,13 +36,13 @@ def longest_sub(strng):
             start += search[start:end].index(search[end]) + 1
 
     if s + e == 0 and start + end != 0:
-        print(f'Largest substring without repeating characters is the entire string\n"{strng}"')
-        return strng
+        print(f'Largest substring without repeating characters is the entire string\n"{string}"')
+        return string
 
     longest_substring = "".join(search[s:e])
 
     print('The longest substring in:')
-    print(f'"{strng}"')
+    print(f'"{string}"')
     print(f'is "{longest_substring}", from letter number {s+1} to number {e}.')
 
     return longest_substring
