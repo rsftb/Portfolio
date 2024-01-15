@@ -1,46 +1,98 @@
+from types import FunctionType
 import re
+import cProfile
+import dis
 
 
-# Static helpers
+# TODO
+#   * Utilities:
+#       - more methods, maybe another profiling method
+#   * SortingAlgorithms:
+#       - add MergeSort
+#       - add InsertionSort
+#       - add BogoSort
+#   * SizedList:
+#       - see if there's relevant dunder methods missing
+#   ~ Maths:
+#       - create
+
+
+# Static helpers in namespace Utilities
 class Utilities:
     def __new__(*args, **kwargs) -> None: ...
     
+    ## Boolean "is_something()" methods
+    # Removed the methods is_func and is_lambda
+    
+    # Utilities.is_hex32("0xC2FF")
     @classmethod
-    def is_hex32(cls, string: str) -> bool:
-        return re.fullmatch(r"^0x(([0-9A-F]){1,4})|(([0-9a-f]){1,4})$", string) is not None
+    def is_hex32(cls, hexadecimal: str) -> bool:
+        return re.fullmatch(r"^0x(([0-9A-F]){1,4})|(([0-9a-f]){1,4})$", hexadecimal) is not None
+    
+    # Utilities.is_hex64("0xdeadbeef")
+    @classmethod
+    def is_hex64(cls, hexadecimal: str) -> bool: 
+        return re.fullmatch(r"^0x(([0-9A-F]){1,8})|(([0-9a-f]){1,8})$", hexadecimal) is not None
+
+
+    ## Visual debugging tools
+    
+    # Utilities.quick_cProfile(myfunc, ("foo",), 50)
+    @classmethod
+    def quick_cProfile(cls, func: callable, arguments: tuple, calls=1):
+        if calls == 1:
+            pr = cProfile.Profile()
+            pr.enable()
+            func(*arguments)
+            pr.disable()
+            pr.print_stats()
+        elif calls > 1:
+            pr = cProfile.Profile()
+            pr.enable()
+            for i in range(calls): func(*arguments)
+            pr.disable()
+            pr.print_stats()
+        else:
+            return False
+    
+    # Utilities.disassemble_func(myfunc)
+    @classmethod
+    def disassemble_func(cls, func: FunctionType):
+        bytecode = dis.dis(func)
+        print(bytecode)
+    
+    
+    ## Auxillary functions    
         
+    # Utilities.elect([6, 3, 1, 4, 5], lambda n: n > 3 and n < 6)
     @classmethod
-    def is_hex64(cls, string: str) -> bool: 
-        return re.fullmatch(r"^0x(([0-9A-F]){1,8})|(([0-9a-f]){1,8})$", string) is not None
+    def elect(cls, container, cb: callable) -> any:
+        """Returns the first item which yields True"""
+        
+        # Any callable
+        if callable(cb):
+            for c in container:
+                if cb(c) is True: return c
+            return None
     
-    # Doesn't seem to be any difference in the two methods below
-    
-    #@classmethod
-    #def is_lambda(cls, cb) -> bool:
-    #    return isinstance(cb, LambdaType)
-    
-    #@classmethod
-    #def is_func(cls, cb) -> bool:
-    #    return isinstance(cb, FunctionType)
+        # String-name callable
+        if isinstance(cb, str):
+            if eval(f"callable({cb})"):
+                for c in container:
+                    if eval(f"{cb}(c)"): return c
+                return None
+            
+        return False
     
     # Fairly useless function
     # Utilities.swap([1, 2, 3], 0, 2)
     @classmethod
     def swap(cls, container, i, j):
         container[i], container[j] = container[j], container[i]
-    
-    
-print("===== Utilities =====")
-hexnum = hex(30053)
-print(hexnum)
-
-print(Utilities.is_hex32("0x0000"))
-
-print("=====================\n")
 
 
 
-# Functor
+# Functor for sorting algorithms
 class SortingAlgorithms:
     def __new__(self, container, algorithm, direction="ascending"):
       
@@ -69,24 +121,6 @@ class SortingAlgorithms:
     
         return self.quicksort(left) + middle + self.quicksort(right)
         
-
-print("===== Sorting Algorithms =====")
-
-foo = [4, 2, 8, 1, 4, 3]
-print(foo, end=" > ")
-
-foo_sorted = SortingAlgorithms([4, 2, 8, 1, 4, 3], "quicksort")
-print(foo_sorted)
-
-
-#bar = [2, 8, 1, 3, 2, 1]
-#print(bar, end=" > ")
-
-#bar_sorted = SortingAlgorithms.mergesort(bar)
-#print(bar_sorted)
-
-print("==============================\n")
-
 
 
 class SizeError(Exception): ...
@@ -123,7 +157,7 @@ class SizedList:
     # inst.append(x)
     def append(self, item):
         if len(self.sizedlist) >= self.max_size:
-            raise SizeError(f"Max length of '{self.max_length}' exceeded")
+            raise SizeError(f"Max size of '{self.max_size}' exceeded.")
         else:
             self.sizedlist.append(item)
     
@@ -154,78 +188,5 @@ class SizedList:
         else:
             self.sizedlist.extend(other)
         return self
-
-
-print("===== Sized List =====")
-        
-foo = SizedList(9, [73, 62, 21])
-bar = SizedList(5, [1, 2, 3])
-
-foo.append(59)
-foo.append(20)
-
-print(f"foo: {foo}")
-print(f"foo.pop(1) > {foo.pop(1)}")
-print(f"foo: {foo}")
-
-print("\nfoo += bar")
-foo += bar
-
-print(f"foo: {foo}")
-print(f"bar: {bar}")
-
-print(f"\nfoo.size: {foo.size}")
-print(f"foo.max_size: {foo.max_size}")
-
-print("\ntry:")
-try:
-    print("    foo.max_size = 2")
-    foo.max_size = 2
-except Exception as err:
-    print(f"Exception:\n    {err}")
-    
-
-print("======================\n")
-      
-
-
-# Returns the first item which yields True
-def elect(container, cb):
-        
-    # Any callable
-    if callable(cb):
-        for c in container:
-            if cb(c) is True: return c
-        return None
-    
-    # String-name callable
-    if isinstance(cb, str):
-        if eval(f"callable({cb})"):
-            for c in container:
-                if eval(f"{cb}(c)"): return c
-            return None
-            
-    return False
-
-
-def blah(x: any):
-    return len(x.__repr__()) > 1
-
-
-print("===== elect() =====")
-
-foo = elect([2, 6, 3, 4, 5], lambda n: n > 2 and n < 6)
-print(foo)
-
-foo = elect([1, 345, 5284], blah)
-print(foo)
-
-foo = elect([6, "aaa", 7], "blah")
-print(foo)
-
-foo = elect([1, 2, 3], range) # range is callable but doesn't yield the class True so function returns None, being able to evaluate range(1) >> 1 as True doesn't matter here
-print(foo)
-
-print("===================")
 
 
