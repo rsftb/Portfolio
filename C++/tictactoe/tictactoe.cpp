@@ -45,7 +45,7 @@ int random(int min, int max)
 }
 
 
-std::pair<int, int>random_turn (std::vector<std::pair<int, int>>& moves_left)
+std::pair<int, int> random_turn(std::vector<std::pair<int, int>>& moves_left)
 {    
     std::random_device r;
     std::mt19937 gen(r());
