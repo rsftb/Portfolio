@@ -1,4 +1,5 @@
 from types import FunctionType
+from typing import Generator
 import re
 import cProfile
 import dis
@@ -25,21 +26,21 @@ class Utilities:
     # Removed the methods is_func and is_lambda
     
     # Utilities.is_hex32("0xC2FF")
-    @classmethod
-    def is_hex32(cls, hexadecimal: str) -> bool:
+    @staticmethod
+    def is_hex32(hexadecimal: str) -> bool:
         return re.fullmatch(r"^0x(([0-9A-F]){1,4})|(([0-9a-f]){1,4})$", hexadecimal) is not None
     
     # Utilities.is_hex64("0xdeadbeef")
-    @classmethod
-    def is_hex64(cls, hexadecimal: str) -> bool: 
+    @staticmethod
+    def is_hex64(hexadecimal: str) -> bool: 
         return re.fullmatch(r"^0x(([0-9A-F]){1,8})|(([0-9a-f]){1,8})$", hexadecimal) is not None
 
 
     ## Visual debugging tools
     
     # Utilities.quick_cProfile(myfunc, ("foo",), 50)
-    @classmethod
-    def quick_cProfile(cls, func: callable, arguments: tuple, calls=1):
+    @staticmethod
+    def quick_cProfile(func: FunctionType, arguments: tuple, calls=1):
         if calls == 1:
             pr = cProfile.Profile()
             pr.enable()
@@ -56,8 +57,8 @@ class Utilities:
             return False
     
     # Utilities.disassemble_func(myfunc)
-    @classmethod
-    def disassemble_func(cls, func: FunctionType):
+    @staticmethod
+    def disassemble_func(func: FunctionType):
         bytecode = dis.dis(func)
         print(bytecode)
     
@@ -65,8 +66,8 @@ class Utilities:
     ## Auxillary functions    
         
     # Utilities.elect([6, 3, 1, 4, 5], lambda n: n > 3 and n < 6)
-    @classmethod
-    def elect(cls, container, cb: callable) -> any:
+    @staticmethod
+    def elect(container, cb: callable) -> any:
         """Returns the first item which yields True"""
         
         # Any callable
@@ -75,28 +76,33 @@ class Utilities:
                 if cb(c) is True: return c
             return None
     
-        # String-name callable
-        if isinstance(cb, str):
-            if eval(f"callable({cb})"):
-                for c in container:
-                    if eval(f"{cb}(c)"): return c
-                return None
-            
+        # String-name callable version removed
+ 
         return False
+    
+    # Utilities.collapse([1, ([3, 5], 7), 9])
+    @classmethod
+    def collapse(cls, container: (list, tuple, set)) -> Generator:
+        """Collapses the entire input container to a single dimension"""
+        for c in container:
+            if isinstance(c, (list, tuple, set)):
+                yield from cls.collapse(c)
+            else:
+                yield c
     
     # Fairly useless function
     # Utilities.swap([1, 2, 3], 0, 2)
-    @classmethod
-    def swap(cls, container, i, j):
+    @staticmethod
+    def swap(container, i, j):
         container[i], container[j] = container[j], container[i]
 
 
 
 # Functor for sorting algorithms
 class SortingAlgorithms:
-    def __new__(self, container, algorithm, direction="ascending"):
+    def __new__(cls, container, algorithm, direction="ascending"):
       
-        f = getattr(self, algorithm, None)
+        f = getattr(cls, algorithm, None)
         if f is None: return False
         
         sorted_container = f(container, direction)
@@ -104,7 +110,7 @@ class SortingAlgorithms:
     
     # Modifies the list in-place (in the future)
     @classmethod
-    def quicksort(self, container, direction="ascending"):
+    def quicksort(cls, container, direction="ascending"):
         
         if len(container) < 2:
             return container
@@ -119,7 +125,7 @@ class SortingAlgorithms:
             elif i > pivot: right.append(i)
             else: middle.append(i)
     
-        return self.quicksort(left) + middle + self.quicksort(right)
+        return cls.quicksort(left) + middle + cls.quicksort(right)
         
 
 

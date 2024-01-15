@@ -1,7 +1,6 @@
 from rslib import Utilities, SortingAlgorithms, SizedList
 
 
-
 print("===== Utilities =====")
 
 hexnum = hex(30053)
@@ -16,9 +15,15 @@ print(Utilities.is_hex32(hexnum))
 #Utilities.disassemble_func(Utilities.is_hex32)
 
 
-print("====={{ elect }}=====")
+print("=====- collapse -====")
+nested = [1, 2, [3, [4, 5], (6, 7), 8], 9]
+collapsed = Utilities.collapse(nested)
+print(f"{nested} > {list(collapsed)}")
 
-def blah(x: any): return len(x.__repr__()) > 1
+print("======- elect -======")
+
+def blah(x: any):
+    return len(x.__repr__()) > 1
 
 foo = Utilities.elect([2, 6, 3, 4, 5], lambda n: n > 2 and n < 6)
 print(foo)
